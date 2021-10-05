@@ -3,8 +3,9 @@ A parameterized minutiae-based methods in securing fingerprint templates
 
 ## Databases
 ### FVC2002 Fingerprint Dataset
+[FVC2002 Database](http://bias.csr.unibo.it/fvc2002/default.asp)
 ### FCJ2020 Fingerprint Dataset
-[FCJ2020 Fingerprint Dataset](https://github.com/mijancse/FCJ2020_Fingerprint_Database)
+[FCJ2020 Dataset](https://github.com/mijancse/FCJ2020_Fingerprint_Database)
 ### Local Fingerprint Images
 Sample Dataset: 600 images; Training Dataset: 300 images; Testing Dataset: 300 images
 
