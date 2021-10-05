@@ -6,8 +6,8 @@ A parameterized minutiae-based methods in securing fingerprint templates
 ### Fingerprint Minutiae Feature Extraction
 ### Minutiae Based Methods
 ### Performance Analysis
-### Minutiae Template Generarion
-### Graphical User Inferface (GUI) Tools 
+### Minutiae Template Generation
+### Graphical User Interface (GUI) Tools 
 
 ## Databases
 ### FVC2002 Fingerprint Dataset
