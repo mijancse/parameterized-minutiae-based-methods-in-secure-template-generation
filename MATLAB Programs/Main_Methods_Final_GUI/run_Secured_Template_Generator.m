@@ -1,0 +1,672 @@
+function varargout = run_Secured_Template_Generator(varargin)
+% RUN_SECURED_TEMPLATE_GENERATOR MATLAB code for run_Secured_Template_Generator.fig
+%      RUN_SECURED_TEMPLATE_GENERATOR, by itself, creates a new RUN_SECURED_TEMPLATE_GENERATOR or raises the existing
+%      singleton*.
+%
+%      H = RUN_SECURED_TEMPLATE_GENERATOR returns the handle to a new RUN_SECURED_TEMPLATE_GENERATOR or the handle to
+%      the existing singleton*.
+%
+%      RUN_SECURED_TEMPLATE_GENERATOR('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in RUN_SECURED_TEMPLATE_GENERATOR.M with the given input arguments.
+%
+%      RUN_SECURED_TEMPLATE_GENERATOR('Property','Value',...) creates a new RUN_SECURED_TEMPLATE_GENERATOR or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before run_Secured_Template_Generator_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to run_Secured_Template_Generator_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help run_Secured_Template_Generator
+
+% Last Modified by GUIDE v2.5 14-Apr-2019 02:22:14
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @run_Secured_Template_Generator_OpeningFcn, ...
+                   'gui_OutputFcn',  @run_Secured_Template_Generator_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before run_Secured_Template_Generator is made visible.
+function run_Secured_Template_Generator_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to run_Secured_Template_Generator (see VARARGIN)
+
+% Choose default command line output for run_Secured_Template_Generator
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes run_Secured_Template_Generator wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = run_Secured_Template_Generator_OutputFcn(hObject, eventdata, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on button press in enhanceBtn.
+function enhanceBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to enhanceBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I;
+Img = before_enhancement(I); %manually cut 4 sides of the picture
+            % % % % % EnhancedImg =  fft_enhance_cubs(Img,6);             % Enhance with Blocks 6x6
+            % % % % % EnhancedImg =  fft_enhance_cubs(EnhancedImg,12);         % Enhance with Blocks 12x12
+            % % % % % EnhancedImg =  fft_enhance_cubs(EnhancedImg,24); % Enhance with Blocks 24x24
+global EnhancedImg;
+EnhancedImg =  fft_enhance_cubs(Img,-1); % if -1, 12x12
+axes(handles.axes1);
+imshow(EnhancedImg);
+title('Enhanced');
+
+
+% --- Executes on button press in normalizeBtn.
+function normalizeBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to normalizeBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I_Normalized;
+axes(handles.axes1);
+imshow(I_Normalized);
+title('Normalized');
+
+
+% --- Executes on button press in binarizeBtn.
+function binarizeBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to binarizeBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I_Normalized
+global I_Oriented;
+global Mask;
+global I_Binarized;
+global m;
+global n;
+I_Oriented=ridgeorient(I_Normalized, 1, 3, 3);
+I_Oriented_Masked = zeros(m,n);
+for i=1:1:m
+   for j=1:1:n
+       if(Mask(i,j)==true)
+           I_Oriented_Masked(i,j) = I_Oriented(i,j);
+       else
+           I_Oriented_Masked(i,j) = 255;
+       end
+           
+   end
+end
+% Ridge Frequency
+[I_Ridge_Freq, MedianFreq] = ridgefreq_by_NA(I_Normalized, Mask, I_Oriented, 32, 5, 5, 15);
+% BINARIZATION
+ModifiedMask=Mask.*MedianFreq;
+I_Binarized = ridgefilter_by_NA(I_Normalized, I_Oriented, ModifiedMask, 0.5, 0.5, 1) > 0;
+axes(handles.axes1);
+imshow(I_Binarized);
+title('Binarized');
+
+% --- Executes on button press in thinBtn.
+function thinBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to thinBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I_Binarized;
+global I_Thinned;
+global Mask;
+global I_Thinned_Masked;
+I_Thinned =  bwmorph(~I_Binarized, 'thin',Inf);
+I_Thinned_Masked = I_Thinned.*Mask;
+axes(handles.axes1);
+imshow(I_Thinned_Masked);
+title('Thinned');
+
+
+% --- Executes on button press in detectMinutiaeBtn.
+function detectMinutiaeBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to detectMinutiaeBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I;
+global I_Thinned;
+global I_Thinned_Masked;
+global Mask;
+global I_Oriented;
+global Minutiae;
+[Minutiae, Min_path_index] = extract_minutiaes(I_Thinned, I, Mask, I_Oriented);
+global Real_Minutiae;
+Real_Minutiae = Minutiae;
+axes(handles.axes1);
+imshow(~I_Thinned_Masked);
+title('Real Minutiae');
+hold on
+for i=1:size(Minutiae(:,1),1)
+   plot(Minutiae(i,1),Minutiae(i,2),'b.');
+   hold on
+   % drawing main minutiae circle
+   r=5;
+   xc=Minutiae(i,1);
+   yc=Minutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'b');
+   hold on
+   
+   % drawing the angle line for main minutiae
+   r=2;
+   angle=Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x1=xc+xp;
+   y1=yc+yp;
+   r=15;
+   angle=Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x2=xc+xp;
+   y2=yc+yp;
+   
+   line([x1 x2],[y1 y2],'LineWidth',2, 'Color',[0 0 1]);
+   hold on
+end
+
+
+
+
+% --- Executes on button press in ImageSelecterBtn.
+function ImageSelecterBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to ImageSelecterBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[filename, pathname] = uigetfile('*.*','Image Selector');
+file=fullfile(pathname, filename);
+global I;
+global m;
+global n;
+I = imread(file);
+m = size(I,1); 
+n = size(I,2);
+axes(handles.axes1);
+imshow(I);
+title('Original');
+
+
+
+% --- Executes on button press in preprocessBtn.
+function preprocessBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to preprocessBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I;
+Img = before_enhancement(I); %manually cut 4 sides of the picture
+imshow(Img);
+title('Preprocessed');
+
+% --- Executes during object creation, after setting all properties.
+function normalizeBtn_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to normalizeBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in roiBtn.
+function roiBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to roiBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global EnhancedImg;
+global Mask;
+global I_Normalized;
+blksze = 5;   thresh = 0.085;   % FVC2002 DB1
+[I_Normalized, Mask, maskind] = segment_normalize_by_NA(EnhancedImg, blksze, thresh);
+axes(handles.axes1);
+imshow(Mask);
+title('Segmentation');
+
+
+% --- Executes on button press in pushbutton8.
+function pushbutton8_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I;
+axes(handles.axes1);
+imshow(I);
+title('Original');
+
+
+
+
+
+% --- Executes on button press in pushbutton18.
+function pushbutton18_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in addingChaffMinutiaeBtn.
+function addingChaffMinutiaeBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to addingChaffMinutiaeBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I_Thinned_Masked;
+global Minutiae;
+global ChaffMinutiae;
+global Real_Minutiae;
+global Moved_Minutiae;
+Minutiae = Real_Minutiae;
+ChaffIndex=1;
+imshow(~I_Thinned_Masked);
+title('Adding CHAFF Minutiae');
+hold on
+for i=1:size(Minutiae(:,1),1)
+   plot(Minutiae(i,1),Minutiae(i,2),'b.');
+   hold on
+   % drawing main minutiae circle
+   r=3;
+   xc=Minutiae(i,1);
+   yc=Minutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'b');
+   hold on
+   
+   % drawing the angle line for main minutiae
+   r=2;
+   angle=Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x1=xc+xp;
+   y1=yc+yp;
+   r=15;
+   angle=Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x2=xc+xp;
+   y2=yc+yp;
+   
+   line([x1 x2],[y1 y2],'LineWidth',2, 'Color',[0 0 1]);
+   hold on
+   
+   % Drwaing Fuzzy Vault Circles for the minutiae
+   StatingAngle = Minutiae(i,4);
+   r=20;     % <----------- Circle Varied {{{VARIABLE}}}
+   xc=Minutiae(i,1);
+   yc=Minutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'Color',[0 0 0]);
+   hold on
+   
+%    % detecting 7 points
+%    angForPoints=(StatingAngle+pi/4):pi/4:(StatingAngle+(2*pi)-(pi/4)); 
+%    xp=r*cos(angForPoints);
+%    yp=r*sin(angForPoints);
+
+   % detecting 16 points
+   angForPoints=(StatingAngle+0):pi/8:(StatingAngle+(2*pi)-(pi/8)); 
+   xp=r*cos(angForPoints);
+   yp=r*sin(angForPoints);
+%    plot(xc+xp,yc+yp,'r.');
+   
+   
+   
+   
+   
+   % Getting 16 circles Centers
+   for k=1:16
+      Center_x(k) = xc+xp(k); 
+      Center_y(k) = yc+yp(k); 
+   end
+   
+   SixteenPointsAngles=0:pi/8:(2*pi)-(pi/8); 
+   %drawing 16 circle
+   for k=1:16
+       r=3;
+       xc=Center_x(k);
+       yc=Center_y(k);
+       ang=0:0.01:2*pi; 
+       xp=r*cos(ang);
+       yp=r*sin(ang);
+       plot(xc+xp,yc+yp,'r');
+       
+       % Selecting Chaff
+       if(k==6)    %%%%<<<------------- 6th point chosen (clockwise)
+           plot(xc,yc,'r.','MarkerSize',20);
+           ChaffMinutiae(ChaffIndex,1) = xc;
+           ChaffMinutiae(ChaffIndex,2) = yc;
+           if( (Minutiae(i,4) + 2.5)>=6.2832)   %%%% <<-------------- ANGLE ADDED 2.5 {{{VARIABLE}}}
+               ChaffMinutiae(ChaffIndex,4) = (Minutiae(i,4) + 2.5) - 6.2832;
+           else
+               ChaffMinutiae(ChaffIndex,4) = (Minutiae(i,4) + 2.5);
+           end
+           ChaffIndex = ChaffIndex+1;
+       end
+
+       % Moving the real minutiae
+       if(k==11)    %%%%<<<------------- other than 6th point chosen (clockwise)
+           plot(xc,yc,'b.','MarkerSize',20);
+           Minutiae(i,1) = xc;
+           Minutiae(i,2) = yc;
+           if((Minutiae(i,4) + (6.2832-2.5))>=6.2832)   %%%% <<-------------- ANGLE ADDED 2.5 {{{VARIABLE}}}
+				Minutiae(i,4) = (Minutiae(i,4) + (6.2832-2.5)) - 6.2832;
+           else
+				Minutiae(i,4) = (Minutiae(i,4) + (6.2832-2.5));
+           end
+%            Minutiae(i,4) = ChaffMinutiae(ChaffIndex-1,4);
+       end
+
+       line([x1 x2],[y1 y2],'LineWidth',2);
+       hold on
+   end
+end
+
+Moved_Minutiae = Minutiae;
+
+
+% --- Executes on button press in addedChaffMinutiaeBtn.
+function addedChaffMinutiaeBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to addedChaffMinutiaeBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I_Thinned_Masked;
+global ChaffMinutiae;
+global Real_Minutiae;
+axes(handles.axes1);
+imshow(~I_Thinned_Masked);
+title('Added CHAFF Minutiae')
+hold on
+for i=1:size(Real_Minutiae(:,1),1)
+   plot(Real_Minutiae(i,1),Real_Minutiae(i,2),'b.');
+   hold on
+   % drawing main Real_Minutiae circle
+   r=3;
+   xc=Real_Minutiae(i,1);
+   yc=Real_Minutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'b');
+   hold on
+   
+   % drawing the angle line for main Real_Minutiae
+   r=2;
+   angle=Real_Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x1=xc+xp;
+   y1=yc+yp;
+   r=15;
+   angle=Real_Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x2=xc+xp;
+   y2=yc+yp;
+   
+   line([x1 x2],[y1 y2],'LineWidth',2, 'Color',[0 0 1]);
+   hold on
+end
+
+
+% DRAWING CHAFF (Moved) MINUTIAE
+hold on
+for i=1:size(ChaffMinutiae(:,1),1)
+   plot(ChaffMinutiae(i,1),ChaffMinutiae(i,2),'r.');
+   hold on
+   % drawing main minutiae circle
+   r=3;
+   xc=ChaffMinutiae(i,1);
+   yc=ChaffMinutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'r');
+   hold on
+   
+   % drawing the angle line for main minutiae
+   r=2;
+   angle=ChaffMinutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x1=xc+xp;
+   y1=yc+yp;
+   r=15;
+   angle=ChaffMinutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x2=xc+xp;
+   y2=yc+yp;
+   
+   line([x1 x2],[y1 y2],'LineWidth',2, 'Color',[1 0 0]);
+   hold on
+end
+
+
+
+
+% --- Executes on button press in movingRealMinutiaeBtn.
+function movingRealMinutiaeBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to movingRealMinutiaeBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I_Thinned_Masked;
+global Minutiae;
+global Real_Minutiae;
+global ChaffMinutiae;
+global Moved_Minutiae;
+axes(handles.axes1);
+imshow(~I_Thinned_Masked);
+title('Moving REAL Minutiae')
+hold on
+for i=1:size(Real_Minutiae(:,1),1)
+   plot(Real_Minutiae(i,1),Real_Minutiae(i,2),'g.');
+   hold on
+   % drawing main Real_Minutiae circle
+   r=3;
+   xc=Real_Minutiae(i,1);
+   yc=Real_Minutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'g');
+   hold on
+   
+   % drawing the angle line for main Real_Minutiae
+   r=2;
+   angle=Real_Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x1=xc+xp;
+   y1=yc+yp;
+   r=15;
+   angle=Real_Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x2=xc+xp;
+   y2=yc+yp;
+   
+   line([x1 x2],[y1 y2],'LineWidth',2, 'Color',[0 1 0]);
+   hold on
+end
+
+
+
+% DRAWING CHAFF (Moved) MINUTIAE
+hold on
+for i=1:size(Moved_Minutiae(:,1),1)
+   plot(Moved_Minutiae(i,1),Moved_Minutiae(i,2),'b.');
+   hold on
+   % drawing main minutiae circle
+   r=3;
+   xc=Moved_Minutiae(i,1);
+   yc=Moved_Minutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'b');
+   hold on
+   
+   % drawing the angle line for main minutiae
+   r=2;
+   angle=Moved_Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x1=xc+xp;
+   y1=yc+yp;
+   r=15;
+   angle=Moved_Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x2=xc+xp;
+   y2=yc+yp;
+   
+   line([x1 x2],[y1 y2],'LineWidth',2, 'Color',[0 0 1]);
+   hold on
+end
+
+
+% DRAWING CHAFF MINUTIAE
+hold on
+for i=1:size(ChaffMinutiae(:,1),1)
+   plot(ChaffMinutiae(i,1),ChaffMinutiae(i,2),'r.');
+   hold on
+   % drawing main minutiae circle
+   r=3;
+   xc=ChaffMinutiae(i,1);
+   yc=ChaffMinutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'r');
+   hold on
+   
+   % drawing the angle line for main minutiae
+   r=2;
+   angle=ChaffMinutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x1=xc+xp;
+   y1=yc+yp;
+   r=15;
+   angle=ChaffMinutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x2=xc+xp;
+   y2=yc+yp;
+   
+   line([x1 x2],[y1 y2],'LineWidth',2, 'Color',[1 0 0]);
+   hold on
+end
+
+
+
+% --- Executes on button press in finalTemplateBtn.
+function finalTemplateBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to finalTemplateBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global I_Thinned_Masked;
+global Minutiae;
+global Moved_Minutiae;
+global ChaffMinutiae;
+axes(handles.axes1);
+imshow(~I_Thinned_Masked);
+title('Final (Moved REAL & CHAFF Minutiae)')
+hold on
+Minutiae = Moved_Minutiae;
+for i=1:size(Minutiae(:,1),1)
+   plot(Minutiae(i,1),Minutiae(i,2),'b.');
+   hold on
+   % drawing main minutiae circle
+   r=3;
+   xc=Minutiae(i,1);
+   yc=Minutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'b');
+   hold on
+   
+   % drawing the angle line for main minutiae
+   r=2;
+   angle=Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x1=xc+xp;
+   y1=yc+yp;
+   r=15;
+   angle=Minutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x2=xc+xp;
+   y2=yc+yp;
+   
+   line([x1 x2],[y1 y2],'LineWidth',2, 'Color',[0 0 1]);
+   hold on
+end
+
+
+
+% DRAWING CHAFF MINUTIAE
+hold on
+for i=1:size(ChaffMinutiae(:,1),1)
+   plot(ChaffMinutiae(i,1),ChaffMinutiae(i,2),'r.');
+   hold on
+   % drawing main minutiae circle
+   r=3;
+   xc=ChaffMinutiae(i,1);
+   yc=ChaffMinutiae(i,2);
+   ang=0:0.01:2*pi; 
+   xp=r*cos(ang);
+   yp=r*sin(ang);
+   plot(xc+xp,yc+yp,'r');
+   hold on
+   
+   % drawing the angle line for main minutiae
+   r=2;
+   angle=ChaffMinutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x1=xc+xp;
+   y1=yc+yp;
+   r=15;
+   angle=ChaffMinutiae(i,4); 
+   xp=r*cos(angle);
+   yp=r*sin(angle);
+   x2=xc+xp;
+   y2=yc+yp;
+   
+   line([x1 x2],[y1 y2],'LineWidth',2, 'Color',[1 0 0]);
+   hold on
+end
