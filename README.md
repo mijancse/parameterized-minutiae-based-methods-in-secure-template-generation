@@ -6,7 +6,7 @@ A parameterized minutiae-based methods in securing fingerprint templates
 ### FCJ2020 Fingerprint Dataset
 [FCJ2020 Fingerprint Dataset](https://github.com/mijancse/FCJ2020_Fingerprint_Database)
 ### Local Fingerprint Images
-Sample Dataset: 600 images; Tranning Dataset: 300 images; Testing Dataset: 300 images
+Sample Dataset: 600 images; Training Dataset: 300 images; Testing Dataset: 300 images
 
 ## Results
   ### Processed Fingerprint Images (Thinned)
