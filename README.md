@@ -3,7 +3,8 @@ A parameterized minutiae-based methods in secure template generation
 
 ## Databases
 ### FVC2002 Fingerprint Dataset
-### [FCJ2020 Fingerprint Dataset] (https://github.com/mijancse/FCJ2020_Fingerprint_Database)
+### FCJ2020 Fingerprint Dataset
+[FCJ2020 Fingerprint Dataset](https://github.com/mijancse/FCJ2020_Fingerprint_Database)
 ### Local Fingerprint Images
 
 ## Results
