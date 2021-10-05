@@ -4,6 +4,10 @@ A parameterized minutiae-based methods in securing fingerprint templates
 ## Algorithms and MATLAB Programs
 ### Fingerprint Image Processing
 ### Fingerprint Minutiae Feature Extraction
+### Minutiae Based Methods
+### Performance Analysis
+### Minutiae Template Generarion
+### Graphical User Inferface (GUI) Tools 
 
 ## Databases
 ### FVC2002 Fingerprint Dataset
