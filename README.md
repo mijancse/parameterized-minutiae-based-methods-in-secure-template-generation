@@ -1,6 +1,11 @@
 # Parameterized Minutiae Based Methods: Secure Template Generation
 A parameterized minutiae-based methods in secure template generation
 
+## Databases
+### FVC2002 Fingerprint Dataset
+### FCJ2020 Fingerprint Dataset
+### Local Fingerprint Images
+
 ## Results
   ### Processed Fingerprint Images (Thinned)
   ### Minutiae Features Extraction
@@ -10,3 +15,6 @@ A parameterized minutiae-based methods in secure template generation
   #### Similarity graphs with fuzzy matching scores among vaults/secure templates
   #### Matching accuracy of query templates against reference dataset
   #### Comparison of matching accuracy scores among all datasets
+  
+## Contact
+Prof. Dr. Md. Mijanur Rahman, Department of Computer Science and Engineering, Jatiya Kabi Kazi Nazrul Islam University, Trishal, Mymensingh, Bangladesh. Email: mijan@jkkniu.edu.bd
