@@ -33,3 +33,5 @@ Prof. Dr. Md. Mijanur Rahman, Department of Computer Science and Engineering, Ja
 ## Citation
 Md. Mijanur Rahman and Tanjarul Islam Mishu, “Parameterized Minutiae Based Methods: Secure Fingerprint Template Generation”, Github Repository, September 2021. https://github.com/mijancse/parameterized-minutiae-based-methods-in-secure-template-generation 
 
+Rahman, Md Mijanur, Tanjarul Islam Mishu, and Md Al Amin Bhuiyan. "Performance analysis of a parameterized minutiae-based approach for securing fingerprint templates in biometric authentication systems." Journal of Information Security and Applications 67 (2022): 103209.
+
